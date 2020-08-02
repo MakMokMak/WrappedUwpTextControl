@@ -1,0 +1,41 @@
+﻿<Window x:Class="WrappedUwpTextBlock4.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WrappedUwpTextBlock4"
+        xmlns:controls="clr-namespace:WrappedUwpTextBlock4.WrappedUwpControls"
+        xmlns:vm="clr-namespace:WrappedUwpTextBlock4.ViewModels"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Window.DataContext>
+        <vm:MainWindowViewModel />
+    </Window.DataContext>
+    <StackPanel>
+        <TextBlock
+            Text="UWP の TextBlock のテスト" FontSize="24"
+            HorizontalAlignment="Center" Margin="10" />
+        <controls:UwpTextBlock
+            x:Name="UwpTextBlock01"
+            Inlines="{Binding InlineDataContainer}"
+            FontSize="20" TextWrapping="Wrap"  Margin="10" />
+        <!--
+            Text="0123abcd ☺⛄☂♨⛅"
+            Text="0123abcd ☺⛄☂♨⛅ abcdefghijklmnopqrstuvwxyz 0123456789 abcdefghijklmnopqrstuvwxyz"
+        -->
+        <Button
+            Name="Button01"
+            Command="{Binding DisplayTextCommand}"
+            Content="表示" FontSize="16" Margin="10" Padding="20 10" />
+        <!--
+            Click="Button01_Click"
+        -->
+        <Button
+            Name="Button02"
+            Command="{Binding ChangeTextCommand}"
+            Content="変更" FontSize="16" Margin="10" Padding="20 10" />
+        <!--
+            Click="Button02_Click"
+        -->
+    </StackPanel>
+</Window>
