@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UWPD = Windows.UI.Xaml.Documents;
 
 namespace WrappedUwpTextBlock4.WrappedUwpControls.Containers
 {
@@ -11,9 +10,14 @@ namespace WrappedUwpTextBlock4.WrappedUwpControls.Containers
             Operation = operation;
         }
 
-        private readonly UwpInlineBuilder _builder = new UwpInlineBuilder();
+        private readonly List<(ContaintKind, string, string)> _container = new List<(ContaintKind, string, string)>();
 
         public InlineDataOperation Operation { get; }
+
+        public List<(ContaintKind containtKind, string text, string urlString)> Container
+        {
+            get => _container;
+        }
 
         public void AddText(string text)
         {
@@ -22,42 +26,60 @@ namespace WrappedUwpTextBlock4.WrappedUwpControls.Containers
                 throw new ArgumentException(nameof(text));
             }
 
-            _builder.AddText(text);
+            _container.Add((ContaintKind.Text, text, null));
         }
 
         public void AddLink(string text, string uriString)
-        {
-            AddLink(text, new Uri(uriString));
-        }
-
-        public void AddLink(string text, Uri uri)
         {
             if (text == null)
             {
                 throw new ArgumentException(nameof(text));
             }
-            if (uri == null)
+            if (uriString == null)
             {
-                throw new ArgumentException(nameof(uri));
+                throw new ArgumentException(nameof(uriString));
             }
 
-            _builder.AddLink(text, uri);
+            _container.Add((ContaintKind.Uri, text, uriString));
         }
 
         public void AddLineBreak()
         {
-            _builder.AddLineBreak();
-        }
-
-        public IEnumerable<UWPD.Inline> ToInlines()
-        {
-            return _builder.ToInLines();
+            _container.Add((ContaintKind.NewLine, null, null));
         }
     }
 
+    /// <summary>
+    /// <see cref="InlineDataContainer.Operation"/> へ設定する InlineDataOperation 列挙型です。
+    /// </summary>
     public enum InlineDataOperation
     {
+        /// <summary>
+        /// 追加操作を表します。
+        /// </summary>
         Append,
+        /// <summary>
+        /// 置き換え操作を表します。
+        /// </summary>
         Replace,
+    }
+
+    /// <summary>
+    /// エレメントの種別を表す ContaintKind 列挙型です。
+    /// </summary>
+    public enum ContaintKind
+    {
+        /// <summary>
+        /// テキストを表します。
+        /// </summary>
+        Text,
+        /// <summary>
+        /// URI を表します
+        /// </summary>
+        Uri,
+        /// <summary>
+        /// 改行を表します。
+        /// </summary>
+        NewLine,
     }
 }

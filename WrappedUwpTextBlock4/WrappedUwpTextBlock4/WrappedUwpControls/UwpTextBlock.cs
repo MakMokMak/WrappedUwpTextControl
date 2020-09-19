@@ -1,4 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Media;
 using WrappedUwpTextBlock4.WrappedUwpControls.Containers;
 using UWP = Windows.UI;
@@ -19,7 +21,7 @@ namespace WrappedUwpTextBlock4.WrappedUwpControls
 
         public static readonly DependencyProperty FontSizeProperty =
             DependencyProperty.Register(nameof(FontSize), typeof(double),
-                typeof(UwpTextBlock), new PropertyMetadata(SystemFonts.MessageFontSize,
+                typeof(UwpTextBlock), new PropertyMetadata(System.Windows.SystemFonts.MessageFontSize,
                     new PropertyChangedCallback(OnFontSizeChanged)));
 
         private static void OnFontSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -122,7 +124,7 @@ namespace WrappedUwpTextBlock4.WrappedUwpControls
                     uwpTextBlock._myTextBlock.Inlines.Clear();
                     return;
                 }
-                var inlines = container.ToInlines();
+                var inlines = GetInlines(container);
                 if (container.Operation == InlineDataOperation.Replace)
                 {
                     uwpTextBlock._myTextBlock.Inlines.Clear();
@@ -134,10 +136,57 @@ namespace WrappedUwpTextBlock4.WrappedUwpControls
             }
         }
 
+        private static IEnumerable<UWP.Xaml.Documents.Inline> GetInlines(InlineDataContainer container)
+        {
+            var builder = new UwpInlineBuilder();
+
+            foreach (var (containtKind, text, urlString) in container.Container)
+            {
+                switch (containtKind)
+                {
+                    case ContaintKind.Text:
+                        builder.AddText(text);
+                        break;
+                    case ContaintKind.NewLine:
+                        builder.AddLineBreak();
+                        break;
+                    case ContaintKind.Uri:
+                        builder.AddLink(text, urlString);
+                        break;
+                    default:
+                        throw new NotImplementedException(containtKind.ToString());
+                }
+            }
+
+            return builder.ToInLines();
+        }
+
         public InlineDataContainer Inlines
         {
             get => (InlineDataContainer)GetValue(InlinesProperty);
             set => SetValue(InlinesProperty, value);
+        }
+
+        public static readonly DependencyProperty IsTextSelectionEnabledProperty =
+            DependencyProperty.Register(nameof(IsTextSelectionEnabled), typeof(bool),
+                typeof(UwpTextBlock), new PropertyMetadata(false,
+                    new PropertyChangedCallback(OnIsTextSelectionEnabledChanged)));
+
+        private static void OnIsTextSelectionEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is UwpTextBlock uwpTextBlock)
+            {
+                if (e.Property.Name == nameof(IsTextSelectionEnabled))
+                {
+                    uwpTextBlock._myTextBlock.IsTextSelectionEnabled = (bool)e.NewValue;
+                }
+            }
+        }
+
+        public bool IsTextSelectionEnabled
+        {
+            get => (bool)GetValue(IsTextSelectionEnabledProperty);
+            set => SetValue(IsTextSelectionEnabledProperty, value);
         }
 
         public static readonly DependencyProperty TextWrappingProperty =
